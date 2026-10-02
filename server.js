@@ -154,7 +154,7 @@ function ensurePlanProgress(profile) {
     !existing ||
     !Number.isInteger(existing.level) ||
     existing.level < 1 ||
-    existing.level > 3 ||
+    existing.level > 4 ||
     !Array.isArray(existing.completedDays)
   ) {
     profile.workoutPlanProgress = {
@@ -186,7 +186,7 @@ function ensurePlanProgress(profile) {
     return true;
   }
   if (existing.weekKey !== weekKey) {
-    if (existing.completedDays.length >= 3) existing.level = Math.min(3, existing.level + 1);
+    if (existing.completedDays.length >= 3) existing.level = Math.min(4, existing.level + 1);
     existing.weekKey = weekKey;
     existing.completedDays = [];
     return true;
@@ -271,9 +271,16 @@ function createPersonalizedPlan(profile) {
       milestone: 'Complete 3 planned workout days',
       prescription: '3 rounds · 10-12 comfortable reps · 60-90 sec rest',
       duration: 26
+    },
+    {
+      number: 4,
+      name: 'Advance',
+      milestone: 'Complete 3 planned workout days',
+      prescription: '3-4 rounds · 10-15 controlled reps · 75-90 sec rest',
+      duration: 30
     }
   ];
-  const exerciseCounts = [2, 3, 3];
+  const exerciseCounts = [2, 3, 3, 4];
   const focus = workoutForGoal[profile.fitnessGoal];
   const levelProgress = profile.workoutPlanProgress || { level: 1, completedDays: [] };
   const currentLevel = levelProgress.level;
@@ -383,9 +390,9 @@ function createPersonalizedPlan(profile) {
     summary: aiPlanMatchesProfile
       ? `AI-generated with ${savedAiPlan.model}. Level ${currentLevel}: ${activeDefinition.name}. Complete 3 workout days to unlock the next level.`
       : allWorkoutDaysCompleted
-      ? currentLevel < 3
+      ? currentLevel < 4
         ? `Level ${currentLevel} complete. Level ${currentLevel + 1} unlocks next week.`
-        : 'Level 3 complete. Keep building consistency at this level next week.'
+        : 'Level 4 complete. Keep building consistency at this level next week.'
       : `Level ${currentLevel}: ${activeDefinition.name} · ${profile.fitnessGoal} · ${intensity} intensity. Complete 3 workout days to unlock the next level.`,
     aiGenerated: Boolean(aiPlanMatchesProfile),
     aiModel: aiPlanMatchesProfile ? savedAiPlan.model : null,
@@ -1113,9 +1120,9 @@ async function routeApi(request, response, url) {
     const updatedPlan = createPersonalizedPlan(profileForUser(user));
     return sendJson(response, 200, {
       message: updatedPlan.allWorkoutDaysCompleted
-        ? updatedPlan.currentLevel < 3
+        ? updatedPlan.currentLevel < 4
           ? `Level ${updatedPlan.currentLevel} complete! Level ${updatedPlan.currentLevel + 1} unlocks next week.`
-          : 'Level 3 complete! Keep building consistency at this level next week.'
+          : 'Level 4 complete! Keep building consistency at this level next week.'
         : `${day}'s workout marked complete.`,
       workoutPlan: updatedPlan
     });
